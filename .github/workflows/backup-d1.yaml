@@ -99,15 +99,15 @@ jobs:
                     echo "Encrypting backup with AES-256..."
                     openssl enc -aes-256-cbc -salt -pbkdf2 -iter 100000 \
                       -in backup.sql.gz \
-                      -out "vault1_prod_${{ steps.date.outputs.date }}.sql.gz.enc" \
+                      -out "warden-db_prod_${{ steps.date.outputs.date }}.sql.gz.enc" \
                       -pass pass:"$BACKUP_ENCRYPTION_KEY"
                     rm backup.sql.gz
-                    echo "✅ Backup encrypted: vault1_prod_${{ steps.date.outputs.date }}.sql.gz.enc"
+                    echo "✅ Backup encrypted: warden-db_prod_${{ steps.date.outputs.date }}.sql.gz.enc"
                     ls -lh *.enc
                   else
                     echo "⚠️ BACKUP_ENCRYPTION_KEY not set, skipping encryption"
-                    mv backup.sql.gz "vault1_prod_${{ steps.date.outputs.date }}.sql.gz"
-                    echo "Backup file: vault1_prod_${{ steps.date.outputs.date }}.sql.gz"
+                    mv backup.sql.gz "warden-db_prod_${{ steps.date.outputs.date }}.sql.gz"
+                    echo "Backup file: warden-db_prod_${{ steps.date.outputs.date }}.sql.gz"
                     ls -lh *.sql.gz
                   fi
 
@@ -127,9 +127,9 @@ jobs:
 
                   # Choose file extension based on encryption status
                   if [ -n "$BACKUP_ENCRYPTION_KEY" ]; then
-                    BACKUP_FILE="vault1_prod_${{ steps.date.outputs.date }}.sql.gz.enc"
+                    BACKUP_FILE="warden-db_prod_${{ steps.date.outputs.date }}.sql.gz.enc"
                   else
-                    BACKUP_FILE="vault1_prod_${{ steps.date.outputs.date }}.sql.gz"
+                    BACKUP_FILE="warden-db_prod_${{ steps.date.outputs.date }}.sql.gz"
                   fi
                   
                   aws s3 cp "$BACKUP_FILE" \
@@ -196,9 +196,9 @@ jobs:
                   WEBDAV_BASE_PATH: ${{ secrets.WEBDAV_BASE_PATH || 'warden-worker' }}
               run: |
                   if [ -n "$BACKUP_ENCRYPTION_KEY" ]; then
-                    BACKUP_FILE="vault1_prod_${{ steps.date.outputs.date }}.sql.gz.enc"
+                    BACKUP_FILE="warden-db_prod_${{ steps.date.outputs.date }}.sql.gz.enc"
                   else
-                    BACKUP_FILE="vault1_prod_${{ steps.date.outputs.date }}.sql.gz"
+                    BACKUP_FILE="warden-db_prod_${{ steps.date.outputs.date }}.sql.gz"
                   fi
 
                   rclone copyto "$BACKUP_FILE" "webdav:${WEBDAV_BASE_PATH}/production/$BACKUP_FILE"
@@ -289,15 +289,15 @@ jobs:
                     echo "Encrypting backup with AES-256..."
                     openssl enc -aes-256-cbc -salt -pbkdf2 -iter 100000 \
                       -in backup.sql.gz \
-                      -out "vault1_dev_${{ steps.date.outputs.date }}.sql.gz.enc" \
+                      -out "warden-db_dev_${{ steps.date.outputs.date }}.sql.gz.enc" \
                       -pass pass:"$BACKUP_ENCRYPTION_KEY"
                     rm backup.sql.gz
-                    echo "✅ Backup encrypted: vault1_dev_${{ steps.date.outputs.date }}.sql.gz.enc"
+                    echo "✅ Backup encrypted: warden-db_dev_${{ steps.date.outputs.date }}.sql.gz.enc"
                     ls -lh *.enc
                   else
                     echo "⚠️ BACKUP_ENCRYPTION_KEY not set, skipping encryption"
-                    mv backup.sql.gz "vault1_dev_${{ steps.date.outputs.date }}.sql.gz"
-                    echo "Backup file: vault1_dev_${{ steps.date.outputs.date }}.sql.gz"
+                    mv backup.sql.gz "warden-db_dev_${{ steps.date.outputs.date }}.sql.gz"
+                    echo "Backup file: warden-db_dev_${{ steps.date.outputs.date }}.sql.gz"
                     ls -lh *.sql.gz
                   fi
 
@@ -316,9 +316,9 @@ jobs:
 
                   # Choose file extension based on encryption status
                   if [ -n "$BACKUP_ENCRYPTION_KEY" ]; then
-                    BACKUP_FILE="vault1_dev_${{ steps.date.outputs.date }}.sql.gz.enc"
+                    BACKUP_FILE="warden-db_dev_${{ steps.date.outputs.date }}.sql.gz.enc"
                   else
-                    BACKUP_FILE="vault1_dev_${{ steps.date.outputs.date }}.sql.gz"
+                    BACKUP_FILE="warden-db_dev_${{ steps.date.outputs.date }}.sql.gz"
                   fi
                   
                   aws s3 cp "$BACKUP_FILE" \
@@ -384,9 +384,9 @@ jobs:
                   WEBDAV_BASE_PATH: ${{ secrets.WEBDAV_BASE_PATH || 'warden-worker' }}
               run: |
                   if [ -n "$BACKUP_ENCRYPTION_KEY" ]; then
-                    BACKUP_FILE="vault1_dev_${{ steps.date.outputs.date }}.sql.gz.enc"
+                    BACKUP_FILE="warden-db_dev_${{ steps.date.outputs.date }}.sql.gz.enc"
                   else
-                    BACKUP_FILE="vault1_dev_${{ steps.date.outputs.date }}.sql.gz"
+                    BACKUP_FILE="warden-db_dev_${{ steps.date.outputs.date }}.sql.gz"
                   fi
 
                   rclone copyto "$BACKUP_FILE" "webdav:${WEBDAV_BASE_PATH}/dev/$BACKUP_FILE"
