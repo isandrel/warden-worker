@@ -1,9 +1,13 @@
-name = "warden-worker"
-main = "src/entry.js"
 compatibility_date = "2025-09-19"
-keep_vars = true
-workers_dev = false
-preview_urls = false
+keep_vars          = true
+main               = "src/entry.js"
+name               = "warden-worker"
+preview_urls       = false
+workers_dev        = false
+
+[[routes]]
+custom_domain = true
+pattern       = "${CUSTOM_DOMAIN_NAME}"
 
 [durable_objects]
 bindings = [
@@ -12,15 +16,15 @@ bindings = [
   # while keeping the main Worker fast for the rest.
   #
   # - HEAVY_DO: Rust DO, reuses existing axum router for CPU-heavy endpoints (import/login/password verify).
-  { name = "HEAVY_DO", class_name = "HeavyDo" }
+  { name = "HEAVY_DO", class_name = "HeavyDo" },
 ]
 
 [[migrations]]
-tag = "do_v1"
 new_sqlite_classes = ["HeavyDo"]
+tag                = "do_v1"
 
 [build]
-command = "cargo install --locked -q worker-build --version 0.7.1 && worker-build --release --locked"
+command = "cargo install -q worker-build --force && worker-build --release"
 
 # Rate limiting configuration for protecting sensitive endpoints
 # See: https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/
@@ -36,9 +40,9 @@ simple = { limit = 5, period = 60 }
 # Static assets configuration for serving frontend
 # Frontend files (bw_web_builds) are expected under ./public/web-vault before deployment
 [assets]
-directory = "./public/web-vault"
+directory          = "./public/web-vault"
+html_handling      = "auto-trailing-slash"
 not_found_handling = "404-page"
-html_handling = "auto-trailing-slash"
 # Only invoke Worker for API and Identity routes, serve static files directly for other routes
 run_worker_first = ["/api/*", "/identity/*"]
 
@@ -85,9 +89,9 @@ run_worker_first = ["/api/*", "/identity/*"]
 crons = ["0 3 * * *"]
 
 [[d1_databases]]
-binding = "vault1"
-database_name = "vault1"
-database_id = "${D1_DATABASE_ID}"
+binding        = "warden_db"
+database_id    = "${D1_DATABASE_ID}"
+database_name  = "warden-db"
 migrations_dir = "migrations"
 
 # R2 bucket for file attachments (optional, requires credit card)
@@ -105,17 +109,15 @@ migrations_dir = "migrations"
 binding = "ATTACHMENTS_KV"
 
 [env.dev]
-name = "warden-worker-dev"
-keep_vars = true
-workers_dev = false
+keep_vars    = true
+name         = "warden-worker-dev"
 preview_urls = false
+workers_dev  = false
 
 [env.dev.vars]
 
 [env.dev.durable_objects]
-bindings = [
-  { name = "HEAVY_DO", class_name = "HeavyDo" }
-]
+bindings = [{ name = "HEAVY_DO", class_name = "HeavyDo" }]
 
 # Dev environment also needs cron triggers
 [env.dev.triggers]
@@ -123,14 +125,14 @@ crons = ["0 3 * * *"]
 
 # Rate limiting for dev environment (same settings as production)
 [[env.dev.ratelimits]]
-name = "LOGIN_RATE_LIMITER"
+name         = "LOGIN_RATE_LIMITER"
 namespace_id = "1002"
-simple = { limit = 5, period = 60 }
+simple       = { limit = 5, period = 60 }
 
 [[env.dev.d1_databases]]
-binding = "vault1"
-database_name = "vault1-dev"
-database_id = "${D1_DATABASE_ID_DEV}"
+binding        = "warden_db"
+database_id    = "${D1_DATABASE_ID_DEV}"
+database_name  = "warden-db-dev"
 migrations_dir = "migrations"
 
 # R2 bucket for file attachments in dev environment (optional, requires credit card)
@@ -145,12 +147,12 @@ binding = "ATTACHMENTS_KV"
 # logs
 [env.dev.observability]
 [env.dev.observability.logs]
-enabled = true
+enabled            = true
 head_sampling_rate = 1
-invocation_logs = true
-persist = true
+invocation_logs    = true
+persist            = true
 
 [env.dev.observability.traces]
-enabled = false
-persist = true
+enabled            = false
 head_sampling_rate = 1
+persist            = true
